@@ -1,0 +1,49 @@
+int** fourSum(int* nums, int numsSize, int target, int* returnSize, int** returnColumnSizes){
+    *returnSize = 0;
+    if (numsSize < 4) return NULL;
+
+    // Sort the array
+    int cmp(const void* a, const void* b) {
+        long long diff = *(int*)a - *(int*)b;
+        return (diff > 0) - (diff < 0);
+    }
+    qsort(nums, numsSize, sizeof(int), cmp);
+
+    // Allocate space for results (max worst case: numsSize^4)
+    int maxResults = 20000; // safe estimate
+    int** res = (int**)malloc(sizeof(int*) * maxResults);
+    *returnColumnSizes = (int*)malloc(sizeof(int) * maxResults);
+
+    for (int i = 0; i < numsSize - 3; i++) {
+        if (i > 0 && nums[i] == nums[i-1]) continue; // skip duplicates
+        for (int j = i + 1; j < numsSize - 2; j++) {
+            if (j > i + 1 && nums[j] == nums[j-1]) continue; // skip duplicates
+
+            int left = j + 1, right = numsSize - 1;
+            while (left < right) {
+                long long sum = (long long)nums[i] + nums[j] + nums[left] + nums[right];
+                if (sum == target) {
+                    res[*returnSize] = (int*)malloc(sizeof(int) * 4);
+                    res[*returnSize][0] = nums[i];
+                    res[*returnSize][1] = nums[j];
+                    res[*returnSize][2] = nums[left];
+                    res[*returnSize][3] = nums[right];
+                    (*returnColumnSizes)[*returnSize] = 4;
+                    (*returnSize)++;
+
+                    // Skip duplicates
+                    while (left < right && nums[left] == nums[left+1]) left++;
+                    while (left < right && nums[right] == nums[right-1]) right--;
+                    left++;
+                    right--;
+                } else if (sum < target) {
+                    left++;
+                } else {
+                    right--;
+                }
+            }
+        }
+    }
+
+    return res;
+}
